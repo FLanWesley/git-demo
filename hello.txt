@@ -1,29 +1,206 @@
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 222222222222221
-hello Git 33333333333333333
-hello Git
-hello Git
-hello Git
-hello Git
-hello Git
-hello Git
-hello Git
-hello Git
-hello Git
-hello Git
-hello Git 1323123123`1131
-hello Git
+import java.util.Scanner;
+
+public class HashTableDemo {
+     static Scanner sc = new Scanner(System.in);
+     static HashTab hashTab = new HashTab(7);
+    public static void main(String[] args) {
+        Show();
+    }
+
+    private static void ListEmp() {
+        hashTab.list();
+    }
+
+    private static void Show() {
+        System.out.println("add  添加雇员");
+        System.out.println("list 展示雇员");
+        System.out.println("find 查找雇员");
+        System.out.println("exit 退出");
+        String key = "";
+        key = sc.nextLine();
+        switch (key){
+            case "add":
+                Add();
+                break;
+            case "list":
+                ListEmp();
+                break;
+            case "find":
+                Find();
+                break;
+            case "exit":
+                sc.close();
+                System.exit(0);
+            default:
+                System.out.println("输入错误，请重新输入");
+                Show();
+        }
+        Show();
+    }
+
+    private static void Find() {
+        System.out.println("输入要查找的id");
+        int id = sc.nextInt();
+        hashTab.FindEmpByid(id);
+    }
+
+    private static void Add(){
+        System.out.println("输入id:");
+        int id = sc.nextInt();
+        sc.nextLine();
+        System.out.println("输入名字");
+        String name = sc.nextLine();
+        Emp emp  = new Emp(id,name);
+        hashTab.add(emp);
+    }
+}
+
+//哈希表
+class HashTab{
+    //数组，用来存放链表
+    private EmployeeLinkedList[] employeeLinkedLists;
+    private int size;
+
+    //构造函数，初始化数组大小，并创建对应的链表
+    public HashTab(int size){
+        this.size = size;
+        employeeLinkedLists = new EmployeeLinkedList[size];
+        for (int i = 0; i < size; i++) {
+            employeeLinkedLists[i] = new EmployeeLinkedList();
+        }
+
+    }
+
+    public void add(Emp emp){
+        int empNo = hashfun(emp.id);
+        employeeLinkedLists[empNo].add(emp);
+    }
+
+    //哈希函数，决定哪个雇员对应到哪一根链表
+    public int hashfun(int id){
+        return id % size;
+    }
+
+    public void list(){
+        for (int i = 0; i < size; i++) {
+            employeeLinkedLists[i].list();
+        }
+    }
+
+    public void FindEmpByid(int id){
+        int empNo = hashfun(id);
+        Emp emp = employeeLinkedLists[empNo].findEmpByid(id);
+        if (emp != null){
+            System.out.println("在第"+(empNo+1)+"条链表中找到");
+        }else {
+            System.out.println("在哈希表中没有找到该雇员");
+        }
+    }
+
+    public void del(int id){
+        int empNo = hashfun(id);
+        String str = employeeLinkedLists[empNo].delEmp(id);
+        System.out.println(str);
+    }
+}
+
+//链表
+class EmployeeLinkedList{
+    //每一个链表都有一个头指针，指向当前链表的第一个元素
+    private Emp head;
+
+    @Deprecated
+    public void add(Emp emp){
+        //添加的是第一个元素
+        if (head == null){
+            head = emp;
+            return;
+        }
+        //不是，则找到最后一个元素，让它指向添加的元素。
+        Emp current = head;
+        while(current != null){
+            current = current.next;
+        }
+        current.next = emp;
+    }
+
+    public void addByid(Emp emp){
+        if (head == null){
+            head = emp;
+            return;
+        }
+        Emp cur = head;
+        while (cur.next.next.id > emp.id && cur.next.next != null){
+        //当前元素的下一个的下一个元素的id值已经要小于要插入的id
+            cur.next = emp;
+            emp.next = cur.next.next;
+            cur = cur.next;
+        }
+    }
+
+    public void list(){
+        //遍历链表
+        Emp cur = head;
+        if (head == null){
+            System.out.println("当前链表为空");
+            return;
+        }
+
+        System.out.println("当前链表信息为");
+        while(true){
+            System.out.printf("--> id=%d name=%s\t",cur.id,cur.name);
+            if (cur.next == null){
+                break;
+            }
+            cur = cur.next;
+        }
+        System.out.println();
+    }
+
+    public Emp findEmpByid(int id){
+        if (head == null){
+            System.out.println("链表空");
+            return null;
+        }
+        Emp cur = head;
+        while (true){
+            if (cur.id == id){
+                return cur;
+            }
+            if (cur.next == null){
+                cur = null;
+                break;
+            }
+            cur = cur.next;
+        }
+        return cur;
+    }
+    public String delEmp(int id){
+        if (head == null){
+            String str = "哈希表为空，确认要删除的值是否存在";
+        }
+        while (head.next != null){
+            if (head.next.id == id){
+                //下一个元素就是我们要删除的元素
+                head.next = head.next.next;
+
+                return "删除成功";
+            }
+            head = head.next;
+        }
+        return "确认要删除的值是否存在";
+    }
+}
+
+//表示雇员信息
+class Emp{
+    public int id;
+    public String name;
+    public Emp next;
+
+    public Emp(int id,String name){
+        super();
+        this.id = id;
+        this.name = name;
+    }
+}
